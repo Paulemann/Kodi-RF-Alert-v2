@@ -1,0 +1,15 @@
+[Unit]
+Description=KODI Alert Service
+After=multi-user.target
+
+[Service]
+Type=idle
+Restart=on-success
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/python3 -u /home/pi/kodi_alert_433.py
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=kodi_alert_433
+
+[Install]
+WantedBy=multi-user.target

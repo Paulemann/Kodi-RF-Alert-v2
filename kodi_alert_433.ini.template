@@ -1,0 +1,33 @@
+[KODI JSON-RPC]
+hostname: 192.168.178.12, 192.168.178.15
+port: 8080
+username: kodi
+password:
+
+[GPIO]
+rxdata: 27
+
+[RF Alert]
+code: 12345678
+description: Front door
+
+[Mail Account]
+smtpserver: smtp.server.com:port
+realname: MotionSensor
+username: xxx@yyy.com
+password: password
+
+[Alert Mail]
+recipient: xxx@yyy.com
+subject: Motion detected
+body: Sensor {} detected motion
+attach: /home/pi/hd-snapshots
+timeformat: %Y-%m-%s %H:%M:%S
+
+[Alert Notification]
+title: Motion detected
+text: Front door
+
+[Local]
+command: /bin/sh /home/pi/stream.sh
+

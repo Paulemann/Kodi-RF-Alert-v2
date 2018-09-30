@@ -1,0 +1,26 @@
+#!/bin/sh
+
+FFMPEGBIN="$(which ffmpeg)"
+SNAPSHOTDIR="/home/pi/snapshots/1"
+
+# Camera IP Address
+CAM="30.30.30.4"
+# onvif1: 1280x720
+# onvif2:  320x180
+INPUTSTREAM="rtsp://${CAM}:554/onvif2"
+TIMEOUT=30
+
+if [ ! -f "${SNAPSHOTDIR}"/.dontstart ] ; then
+  rm "${SNAPSHOTDIR}"/snapshot* >/dev/null 2>&1
+  touch "${SNAPSHOTDIR}"/.dontstart
+
+  CMD="${FFMPEGBIN} -nostdin -rtsp_transport udp -i ${INPUTSTREAM} -an -f image2 -t ${TIMEOUT} -vf fps=fps=5 -vcodec mjpeg \"${SNAPSHOTDIR}\"/snapshot%03d.jpg >/dev/null 2>&1 ; rm \"${SNAPSHOTDIR}\"/.dontstart"
+  eval "${CMD}" &
+fi
+
+if [ -f "${SNAPSHOTDIR}"/snapshot001.jpg ]; then
+  snapshot=$(ls -t "${SNAPSHOTDIR}"/snapshot* | head -n 1)
+  echo "Content-Type: image/jpeg"
+  echo ""
+  cat "${snapshot}"
+fi
