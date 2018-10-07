@@ -133,7 +133,7 @@ def read_config():
         _time_fmt_ = "%Y-%m-%d %H:%M:%S"
 
       for addr in _mail_to_:
-        if not is_mailaddress(addr): 
+        if not is_mailaddress(addr):
           log('Wrong or missing value(s) in configuration file (section [Alert Mail]).')
           return False
 
@@ -198,7 +198,7 @@ def host_is_up(host, port):
   return True
 
 
-def sendmail(to_address, subject, message, attachments=None):
+def sendmail(subject, message, attachments=None):
   #
   # https://code.tutsplus.com/tutorials/sending-emails-in-python-with-smtp--cms-29975
   #
@@ -212,7 +212,7 @@ def sendmail(to_address, subject, message, attachments=None):
     msg['From']  = formataddr((str(Header(_smtp_realname_, 'utf-8')), _smtp_user_))
   else:
     msg['From']  = _smtp_user_
-  msg['To']      = ', '.join(to_address)
+  msg['To']      = ', '.join(_mail_to_)
   msg['Subject'] = subject
 
   msg.attach(MIMEText(message, 'plain'))
@@ -231,7 +231,7 @@ def sendmail(to_address, subject, message, attachments=None):
     server = smtplib.SMTP(_smtp_server_)
     server.starttls()
     server.login(_smtp_user_, _smtp_passwd_)
-    server.sendmail(msg['From'], msg['To'], msg.as_string())
+    server.sendmail(_smtp_user_, _mail_to_, msg.as_string())
 
   except:
     log('Unable to send mail.', level='ERROR')
@@ -246,7 +246,6 @@ def sendmail(to_address, subject, message, attachments=None):
 def alert(timestamp, alertcode):
   # This will execute  the configured local command passing the alertcode as add. argument
   # Attention: Script waits for command to terminate and return
-  # If time critical, it can be moved to bottom of script (before sendmail)
   if _exec_local_:
     try:
       os.system(_exec_local_ + ' ' + str(alertcode))
@@ -260,8 +259,13 @@ def alert(timestamp, alertcode):
       continue
 
     if _notify_title_ and _notify_text_:
-      log('Requesting notification \'{}: {}\' from host {} ...'.format(_notify_title_, _notify_text_, host), level='DEBUG')
-      kodi_request(host, 'GUI.ShowNotification', {'title': _notify_title_, 'message': _notify_text_, 'displaytime': 2000})
+      try:
+        text = _notify_text_.format(_rf_description_[_rf_alertcode_.index(alertcode)])
+      except:
+        text = _notify_text_
+
+      log('Requesting notification \'{}: {}\' from host {} ...'.format(_notify_title_, text, host), level='DEBUG')
+      kodi_request(host, 'GUI.ShowNotification', {'title': _notify_title_, 'message': text, 'displaytime': 2000})
 
     if _addon_id_:
       log('Requesting execution of addon \'{}\' from host {} ...'.format(_addon_id_, host), level='DEBUG')
@@ -285,7 +289,7 @@ def alert(timestamp, alertcode):
       files = _mail_attach_
 
     log('Sending mail to configured recipients via {} ...'.format(_smtp_server_.split(':')[0]), level='DEBUG')
-    sendmail(_mail_to_, subject, body, files)
+    sendmail(subject, body, files)
 
 
 if __name__ == '__main__':
