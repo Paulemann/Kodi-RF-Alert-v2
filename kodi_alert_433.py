@@ -26,11 +26,7 @@ import argparse
 
 
 # global settings
-#_config_file_ = os.path.splitext(os.path.basename(__file__))[0] + '.ini'
-#_log_file_ = None
-#_addon_id_ = 'script.securitycam'
-#_debug_ = True
-#_test_ = False
+_max_waittime_ = 10
 
 
 def is_mailaddress(a):
@@ -90,11 +86,12 @@ def read_config():
 
   log('Reading configuration from file ...')
 
+  config = configparser.ConfigParser(interpolation=None)
+  config.read([os.path.abspath(_config_file_)], encoding='utf-8')
   try:
     # Read the config file
-    config = configparser.ConfigParser(interpolation=None)
-
-    config.read([os.path.abspath(_config_file_)])
+    #config = configparser.ConfigParser(interpolation=None)
+    #config.read([os.path.abspath(_config_file_)], encoding='utf-8')
 
     _kodi_hosts_     = [p.strip(' "\'') for p in config.get('KODI JSON-RPC', 'hostname').split(',')]
     _kodi_port_      = config.get('KODI JSON-RPC', 'port').strip(' "\'')
@@ -283,6 +280,12 @@ def alert(timestamp, alertcode):
       body    = _mail_body_
 
     if _mail_attach_ and os.path.isdir(_mail_attach_[0]):
+
+      waittime = 0
+      while not next(os.walk(_mail_attach_[0]))[2] and waittime < _max_waittime_:
+        waittime += 1
+        time.sleep(1)
+
       p = _mail_attach_[0]
       files = [os.path.join(p, f) for f in os.listdir(p) if os.path.isfile(os.path.join(p, f))]
     else:
