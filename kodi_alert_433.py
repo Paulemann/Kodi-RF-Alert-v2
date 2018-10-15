@@ -287,7 +287,7 @@ def alert(timestamp, alertcode):
         time.sleep(1)
 
       p = _mail_attach_[0]
-      files = [os.path.join(p, f) for f in os.listdir(p) if os.path.isfile(os.path.join(p, f))]
+      files = [os.path.join(p, f) for f in sorted(os.listdir(p)) if os.path.isfile(os.path.join(p, f))]
     else:
       files = _mail_attach_
 
