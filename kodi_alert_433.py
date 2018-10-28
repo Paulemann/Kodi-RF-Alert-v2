@@ -119,7 +119,7 @@ def read_config():
 
       _mail_to_        = [p.strip(' "\'') for p in config.get('Alert Mail', 'recipient').split(',')]
       _mail_subject_   = config.get('Alert Mail', 'subject').strip(' "\'')
-      _mail_body_      = config.get('Alert Mail', 'body').strip(' "\'')
+      _mail_body_      = config.get('Alert Mail', 'body').strip(' "\'').replace('\\n', '\r\n')
       _mail_attach_    = [p.strip() for p in config.get('Alert Mail', 'attach').split(',')]
       _time_fmt_       = config.get('Alert Mail', 'timeformat').strip(' "\'')
 
